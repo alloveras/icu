@@ -1,0 +1,41 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "io",
+    srcs = [
+        "//:icu4c/source/io/locbund.cpp",
+        "//:icu4c/source/io/sprintf.cpp",
+        "//:icu4c/source/io/sscanf.cpp",
+        "//:icu4c/source/io/ucln_io.cpp",
+        "//:icu4c/source/io/ufile.cpp",
+        "//:icu4c/source/io/ufmt_cmn.cpp",
+        "//:icu4c/source/io/uprintf.cpp",
+        "//:icu4c/source/io/uprntf_p.cpp",
+        "//:icu4c/source/io/uscanf.cpp",
+        "//:icu4c/source/io/uscanf_p.cpp",
+        "//:icu4c/source/io/ustdio.cpp",
+        "//:icu4c/source/io/ustream.cpp"
+    ],
+    hdrs = [
+        "//:icu4c/source/io/unicode/ustdio.h",
+        "//:icu4c/source/io/unicode/ustream.h",
+        "//:icu4c/source/io/ufile.h",
+        "//:icu4c/source/io/locbund.h",
+        "//:icu4c/source/io/uscanf.h",
+        "//:icu4c/source/io/uprintf.h",
+        "//:icu4c/source/io/ufmt_cmn.h",
+        "//:icu4c/source/io/ucln_io.h"
+    ],
+    copts = [
+        "-DU_IO_IMPLEMENTATION",
+        "-Iicu4c/source/common",
+        "-Iicu4c/source/i18n",
+        "-Iicu4c/source/io",
+    ],
+    deps = [
+        "//bazel/icu4c/source/common:common",
+        "//bazel/icu4c/source/i18n:i18n",
+    ],
+)

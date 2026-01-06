@@ -1,0 +1,20 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "stubdata",
+    srcs = [
+        "//:icu4c/source/stubdata/stubdata.cpp"
+    ],
+    hdrs = [
+        "//:icu4c/source/stubdata/stubdata.h"
+    ],
+    copts = [
+        "-Iicu4c/source/common",
+    ],
+    deps = [
+        "//bazel/icu4c/source/common:common_headers",
+    ],
+    linkstatic = 1,
+)

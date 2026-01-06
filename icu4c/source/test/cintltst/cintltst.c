@@ -80,9 +80,15 @@ static const char* const * gOrigArgv;
 U_CAPI void unistr_printLengths();
 #endif
 
+extern const char* get_icudt_path(const char* argv0);
+
 int main(int argc, const char* const argv[])
 {
     int nerrors = 0;
+    const char* icuDataPath = get_icudt_path(argv[0]);
+    if (icuDataPath != NULL) {
+        u_setDataDirectory(icuDataPath);
+    }
     UBool   defaultDataFound;
     TestNode *root;
     const char *warnOrErr = "Failure"; 

@@ -1,0 +1,36 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "ctestfw",
+    srcs = [
+        "//:icu4c/source/tools/ctestfw/ctest.c",
+        "//:icu4c/source/tools/ctestfw/datamap.cpp",
+        "//:icu4c/source/tools/ctestfw/testdata.cpp",
+        "//:icu4c/source/tools/ctestfw/tstdtmod.cpp",
+        "//:icu4c/source/tools/ctestfw/ucln_ct.c",
+        "//:icu4c/source/tools/ctestfw/uperf.cpp"
+    ],
+    hdrs = [
+        "//:icu4c/source/tools/ctestfw/unicode/tstdtmod.h",
+        "//:icu4c/source/tools/ctestfw/unicode/ctest.h",
+        "//:icu4c/source/tools/ctestfw/unicode/testlog.h",
+        "//:icu4c/source/tools/ctestfw/unicode/datamap.h",
+        "//:icu4c/source/tools/ctestfw/unicode/testtype.h",
+        "//:icu4c/source/tools/ctestfw/unicode/uperf.h",
+        "//:icu4c/source/tools/ctestfw/unicode/testdata.h",
+        "//:icu4c/source/tools/ctestfw/unicode/utimer.h"
+    ],
+    copts = [
+        "-Iicu4c/source/common",
+        "-Iicu4c/source/i18n",
+        "-Iicu4c/source/tools/toolutil",
+        "-Iicu4c/source/tools/ctestfw",
+    ],
+    deps = [
+        "//bazel/icu4c/source/common:common",
+        "//bazel/icu4c/source/i18n:i18n",
+        "//bazel/icu4c/source/tools/toolutil:toolutil",
+    ],
+)

@@ -35,6 +35,7 @@
 #include "unicode/ures.h"
 #include "unicode/utf16.h"
 
+#include "tools/cpp/runfiles/runfiles.h"
 #include "intltest.h"
 
 #include "caltztst.h"
@@ -1266,6 +1267,20 @@ main(int argc, char* argv[])
     int32_t nProps = 0;
 
     U_MAIN_INIT_ARGS(argc, argv);
+
+    // Initialize Bazel Runfiles
+    using bazel::tools::cpp::runfiles::Runfiles;
+    std::string error;
+    std::unique_ptr<Runfiles> runfiles(Runfiles::Create(argv[0], &error));
+    if (runfiles == nullptr) {
+        fprintf(stderr, "Runfiles::Create error: %s\n", error.c_str());
+        // Fallback or exit? Continue for now.
+    } else {
+        std::string icuDataPath = runfiles->Rlocation("icu4c/source/data/out/build/icudt79l");
+        if (!icuDataPath.empty()) {
+            u_setDataDirectory(icuDataPath.c_str());
+        }
+    }
 
     startTime = uprv_getRawUTCtime();
 
