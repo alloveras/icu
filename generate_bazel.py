@@ -32,22 +32,44 @@ def get_headers(directory):
     headers = []
     if os.path.exists(directory):
         for f in os.listdir(directory):
-            # Include .h, .inc, .hpp files
             if f.endswith('.h') or f.endswith('.inc') or f.endswith('.hpp'):
                 headers.append(f)
     return headers
 
 def write_build_file(path, content):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'w') as f:
         f.write(content)
 
+    if path.startswith("bazel/"):
+        source_path = path[6:]
+        if os.path.exists(os.path.dirname(source_path)):
+            if os.path.exists(source_path) or os.path.islink(source_path):
+                os.remove(source_path)
+            target = os.path.relpath(path, os.path.dirname(source_path))
+            os.symlink(target, source_path)
+            print(f"Symlinked {source_path} -> {target}")
+
+# Data Packages
+def create_data_package(path):
+    if not os.path.exists(path):
+        return
+    content = """package(default_visibility = ["//visibility:public"])
+exports_files(glob(["**"]))
+"""
+    build_path = os.path.join("bazel", path, "BUILD.bazel")
+    write_build_file(build_path, content)
+
+create_data_package("icu4c/source/data")
+create_data_package("icu4c/source/test/testdata")
+
 # Common
 common_srcs = read_sources("icu4c/source/common/sources.txt")
-common_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/common/{s}"' for s in common_srcs])
+common_srcs_formatted = ',\n        '.join([f'"{s}"' for s in common_srcs])
 common_hdrs = get_headers("icu4c/source/common/unicode")
 common_hdrs_internal = get_headers("icu4c/source/common")
-common_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/common/unicode/{h}"' for h in common_hdrs] +
-                                        [f'"//:icu4c/source/common/{h}"' for h in common_hdrs_internal])
+common_hdrs_formatted = ',\n        '.join([f'"unicode/{h}"' for h in common_hdrs] +
+                                        [f'"{h}"' for h in common_hdrs_internal])
 
 common_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -77,7 +99,7 @@ cc_library(
         "-Iicu4c/source/i18n",
     ],
     deps = [
-        "//bazel/icu4c/source/stubdata:stubdata",
+        "//icu4c/source/stubdata:stubdata",
         ":common_headers",
     ],
 )
@@ -86,11 +108,11 @@ write_build_file("bazel/icu4c/source/common/BUILD.bazel", common_build)
 
 # I18n
 i18n_srcs = read_sources("icu4c/source/i18n/sources.txt")
-i18n_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/i18n/{s}"' for s in i18n_srcs])
+i18n_srcs_formatted = ',\n        '.join([f'"{s}"' for s in i18n_srcs])
 i18n_hdrs = get_headers("icu4c/source/i18n/unicode")
 i18n_hdrs_internal = get_headers("icu4c/source/i18n")
-i18n_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/i18n/unicode/{h}"' for h in i18n_hdrs] +
-                                      [f'"//:icu4c/source/i18n/{h}"' for h in i18n_hdrs_internal])
+i18n_hdrs_formatted = ',\n        '.join([f'"unicode/{h}"' for h in i18n_hdrs] +
+                                      [f'"{h}"' for h in i18n_hdrs_internal])
 
 i18n_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -110,7 +132,7 @@ cc_library(
         "-Iicu4c/source/i18n",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common",
+        "//icu4c/source/common:common",
     ],
 )
 """
@@ -118,11 +140,11 @@ write_build_file("bazel/icu4c/source/i18n/BUILD.bazel", i18n_build)
 
 # IO
 io_srcs = read_sources("icu4c/source/io/sources.txt")
-io_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/io/{s}"' for s in io_srcs])
+io_srcs_formatted = ',\n        '.join([f'"{s}"' for s in io_srcs])
 io_hdrs = get_headers("icu4c/source/io/unicode")
 io_hdrs_internal = get_headers("icu4c/source/io")
-io_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/io/unicode/{h}"' for h in io_hdrs] +
-                                    [f'"//:icu4c/source/io/{h}"' for h in io_hdrs_internal])
+io_hdrs_formatted = ',\n        '.join([f'"unicode/{h}"' for h in io_hdrs] +
+                                    [f'"{h}"' for h in io_hdrs_internal])
 
 io_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -143,8 +165,8 @@ cc_library(
         "-Iicu4c/source/io",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common",
-        "//bazel/icu4c/source/i18n:i18n",
+        "//icu4c/source/common:common",
+        "//icu4c/source/i18n:i18n",
     ],
 )
 """
@@ -152,9 +174,9 @@ write_build_file("bazel/icu4c/source/io/BUILD.bazel", io_build)
 
 # Stubdata
 stubdata_srcs = read_sources("icu4c/source/stubdata/sources.txt")
-stubdata_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/stubdata/{s}"' for s in stubdata_srcs])
+stubdata_srcs_formatted = ',\n        '.join([f'"{s}"' for s in stubdata_srcs])
 stubdata_hdrs = get_headers("icu4c/source/stubdata")
-stubdata_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/stubdata/{h}"' for h in stubdata_hdrs])
+stubdata_hdrs_formatted = ',\n        '.join([f'"{h}"' for h in stubdata_hdrs])
 
 stubdata_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -172,7 +194,7 @@ cc_library(
         "-Iicu4c/source/common",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common_headers",
+        "//icu4c/source/common:common_headers",
     ],
     linkstatic = 1,
 )
@@ -181,9 +203,9 @@ write_build_file("bazel/icu4c/source/stubdata/BUILD.bazel", stubdata_build)
 
 # Toolutil
 toolutil_srcs = read_sources("icu4c/source/tools/toolutil/sources.txt")
-toolutil_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/tools/toolutil/{s}"' for s in toolutil_srcs])
+toolutil_srcs_formatted = ',\n        '.join([f'"{s}"' for s in toolutil_srcs])
 toolutil_hdrs = get_headers("icu4c/source/tools/toolutil")
-toolutil_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/tools/toolutil/{h}"' for h in toolutil_hdrs])
+toolutil_hdrs_formatted = ',\n        '.join([f'"{h}"' for h in toolutil_hdrs])
 
 toolutil_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -204,8 +226,8 @@ cc_library(
         "-Iicu4c/source/tools/toolutil",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common",
-        "//bazel/icu4c/source/i18n:i18n",
+        "//icu4c/source/common:common",
+        "//icu4c/source/i18n:i18n",
     ],
 )
 """
@@ -213,11 +235,11 @@ write_build_file("bazel/icu4c/source/tools/toolutil/BUILD.bazel", toolutil_build
 
 # Ctestfw
 ctestfw_srcs = read_sources("icu4c/source/tools/ctestfw/sources.txt")
-ctestfw_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/tools/ctestfw/{s}"' for s in ctestfw_srcs])
+ctestfw_srcs_formatted = ',\n        '.join([f'"{s}"' for s in ctestfw_srcs])
 ctestfw_hdrs = get_headers("icu4c/source/tools/ctestfw")
 ctestfw_hdrs_unicode = get_headers("icu4c/source/tools/ctestfw/unicode")
-ctestfw_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/tools/ctestfw/{h}"' for h in ctestfw_hdrs] +
-                                           [f'"//:icu4c/source/tools/ctestfw/unicode/{h}"' for h in ctestfw_hdrs_unicode])
+ctestfw_hdrs_formatted = ',\n        '.join([f'"{h}"' for h in ctestfw_hdrs] +
+                                           [f'"unicode/{h}"' for h in ctestfw_hdrs_unicode])
 
 ctestfw_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library")
 
@@ -238,13 +260,58 @@ cc_library(
         "-Iicu4c/source/tools/ctestfw",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common",
-        "//bazel/icu4c/source/i18n:i18n",
-        "//bazel/icu4c/source/tools/toolutil:toolutil",
+        "//icu4c/source/common:common",
+        "//icu4c/source/i18n:i18n",
+        "//icu4c/source/tools/toolutil:toolutil",
     ],
 )
 """
 write_build_file("bazel/icu4c/source/tools/ctestfw/BUILD.bazel", ctestfw_build)
+
+# Data
+data_files = []
+def add_data_files(path):
+    if os.path.exists(path):
+        for root, dirs, files in os.walk(path):
+            for f in files:
+                full_path = os.path.join(root, f)
+                pkg = ""
+                rel_path = ""
+                if full_path.startswith("icu4c/source/test/testdata"):
+                    pkg = "icu4c/source/test/testdata"
+                    rel_path = os.path.relpath(full_path, pkg)
+                elif full_path.startswith("icu4c/source/data"):
+                    pkg = "icu4c/source/data"
+                    rel_path = os.path.relpath(full_path, pkg)
+                else:
+                    continue
+                data_files.append(f'"//{pkg}:{rel_path}"')
+
+add_data_files("icu4c/source/data/out/build/icudt79l")
+add_data_files("icu4c/source/test/testdata/out")
+
+if os.path.exists("icu4c/source/test/testdata"):
+    for root, dirs, files in os.walk("icu4c/source/test/testdata"):
+        if "/out" in root.replace(os.sep, "/"):
+            continue
+        for f in files:
+            full_path = os.path.join(root, f)
+            pkg = "icu4c/source/test/testdata"
+            rel_path = os.path.relpath(full_path, pkg)
+            data_files.append(f'"//{pkg}:{rel_path}"')
+
+if os.path.exists("icu4c/source/data"):
+    for root, dirs, files in os.walk("icu4c/source/data"):
+        if "/out" in root.replace(os.sep, "/"):
+            continue
+        for f in files:
+            full_path = os.path.join(root, f)
+            pkg = "icu4c/source/data"
+            rel_path = os.path.relpath(full_path, pkg)
+            data_files.append(f'"//{pkg}:{rel_path}"')
+
+data_files = sorted(list(set(data_files)))
+data_files_formatted = ',\n        '.join(data_files)
 
 # Cintltst
 cintltst_objs = extract_objects_from_makefile("icu4c/source/test/cintltst/Makefile.in")
@@ -255,49 +322,9 @@ for obj in cintltst_objs:
     else:
         cintltst_srcs.append(obj)
 
-cintltst_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/test/cintltst/{s}"' for s in cintltst_srcs])
+cintltst_srcs_formatted = ',\n        '.join([f'"{s}"' for s in cintltst_srcs])
 cintltst_hdrs = get_headers("icu4c/source/test/cintltst")
-cintltst_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/test/cintltst/{h}"' for h in cintltst_hdrs])
-
-# Get data files (built data + test data + source/data)
-data_files = []
-# Built data
-data_path = "icu4c/source/data/out/build/icudt79l"
-if os.path.exists(data_path):
-    for root, dirs, files in os.walk(data_path):
-        for f in files:
-            full_path = os.path.join(root, f)
-            data_files.append(f'"//:{full_path}"')
-
-# Test data (built)
-test_data_out_path = "icu4c/source/test/testdata/out"
-if os.path.exists(test_data_out_path):
-    for root, dirs, files in os.walk(test_data_out_path):
-        for f in files:
-            full_path = os.path.join(root, f)
-            data_files.append(f'"//:{full_path}"')
-
-# Test data (raw)
-test_data_path = "icu4c/source/test/testdata"
-if os.path.exists(test_data_path):
-    for root, dirs, files in os.walk(test_data_path):
-        if "icu4c/source/test/testdata/out" in root:
-            continue
-        for f in files:
-            full_path = os.path.join(root, f)
-            data_files.append(f'"//:{full_path}"')
-
-# Source data (needed for some tests reading raw files)
-source_data_path = "icu4c/source/data"
-if os.path.exists(source_data_path):
-    for root, dirs, files in os.walk(source_data_path):
-        if "icu4c/source/data/out" in root:
-            continue
-        for f in files:
-            full_path = os.path.join(root, f)
-            data_files.append(f'"//:{full_path}"')
-
-data_files_formatted = ',\n        '.join(data_files)
+cintltst_hdrs_formatted = ',\n        '.join([f'"{h}"' for h in cintltst_hdrs])
 
 cintltst_build = f"""load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
 
@@ -317,7 +344,7 @@ cc_test(
     name = "cintltst",
     srcs = [
         {cintltst_srcs_formatted},
-        "//:icu4c/source/test/cintltst/runfiles_helper.cpp",
+        "runfiles_helper.cpp",
         {cintltst_hdrs_formatted}
     ],
     copts = [
@@ -329,10 +356,10 @@ cc_test(
         "-DU_TOPSRCDIR=\\\\\\"icu4c/source/\\\\\\"",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common",
-        "//bazel/icu4c/source/i18n:i18n",
-        "//bazel/icu4c/source/tools/toolutil:toolutil",
-        "//bazel/icu4c/source/tools/ctestfw:ctestfw",
+        "//icu4c/source/common:common",
+        "//icu4c/source/i18n:i18n",
+        "//icu4c/source/tools/toolutil:toolutil",
+        "//icu4c/source/tools/ctestfw:ctestfw",
         "@bazel_tools//tools/cpp/runfiles",
     ],
     data = [
@@ -349,9 +376,9 @@ write_build_file("bazel/icu4c/source/test/cintltst/BUILD.bazel", cintltst_build)
 # Intltest
 intltest_objs = extract_objects_from_makefile("icu4c/source/test/intltest/Makefile.in")
 intltest_srcs = [obj for obj in intltest_objs]
-intltest_srcs_formatted = ',\n        '.join([f'"//:icu4c/source/test/intltest/{s}"' for s in intltest_srcs])
+intltest_srcs_formatted = ',\n        '.join([f'"{s}"' for s in intltest_srcs])
 intltest_hdrs = get_headers("icu4c/source/test/intltest")
-intltest_hdrs_formatted = ',\n        '.join([f'"//:icu4c/source/test/intltest/{h}"' for h in intltest_hdrs])
+intltest_hdrs_formatted = ',\n        '.join([f'"{h}"' for h in intltest_hdrs])
 
 intltest_build = f"""load("@rules_cc//cc:defs.bzl", "cc_test")
 
@@ -376,12 +403,12 @@ cc_test(
         "-DU_TOPSRCDIR=\\\\\\"icu4c/source/\\\\\\"",
     ],
     deps = [
-        "//bazel/icu4c/source/common:common",
-        "//bazel/icu4c/source/i18n:i18n",
-        "//bazel/icu4c/source/io:io",
-        "//bazel/icu4c/source/tools/toolutil:toolutil",
-        "//bazel/icu4c/source/tools/ctestfw:ctestfw",
-        "//bazel/icu4c/source/test/cintltst:cintltst_headers",
+        "//icu4c/source/common:common",
+        "//icu4c/source/i18n:i18n",
+        "//icu4c/source/io:io",
+        "//icu4c/source/tools/toolutil:toolutil",
+        "//icu4c/source/tools/ctestfw:ctestfw",
+        "//icu4c/source/test/cintltst:cintltst_headers",
         "@bazel_tools//tools/cpp/runfiles",
     ],
     data = [
