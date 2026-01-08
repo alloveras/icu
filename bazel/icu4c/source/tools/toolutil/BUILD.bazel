@@ -56,11 +56,9 @@ cc_library(
         "pkg_icu.h",
         "collationinfo.h"
     ],
+    includes = ["."],
     copts = [
         "-DU_TOOLUTIL_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/tools/toolutil",
     ],
     deps = [
         "//icu4c/source/common:common",

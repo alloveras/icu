@@ -28,11 +28,9 @@ cc_library(
         "ufmt_cmn.h",
         "ucln_io.h"
     ],
+    includes = ["."],
     copts = [
         "-DU_IO_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/io",
     ],
     deps = [
         "//icu4c/source/common:common",

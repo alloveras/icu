@@ -43,9 +43,7 @@ cc_library(
         "ucnvseltst.h",
         "cfrtst.h"
     ],
-    copts = [
-        "-Iicu4c/source/test/cintltst",
-    ],
+    includes = ["."],
 )
 
 cc_test(
@@ -180,12 +178,8 @@ cc_test(
         "ucnvseltst.h",
         "cfrtst.h"
     ],
+    includes = ["."],
     copts = [
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/tools/toolutil",
-        "-Iicu4c/source/tools/ctestfw",
-        "-Iicu4c/source/test/cintltst",
         "-DU_TOPSRCDIR=\\\"icu4c/source/\\\"",
     ],
     deps = [

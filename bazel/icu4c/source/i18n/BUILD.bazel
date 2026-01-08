@@ -547,10 +547,9 @@ cc_library(
         "utf8collationiterator.h",
         "reldtfmt.h"
     ],
+    includes = ["."],
     copts = [
         "-DU_I18N_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
     ],
     deps = [
         "//icu4c/source/common:common",

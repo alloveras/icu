@@ -1,0 +1,37 @@
+diff --git a/icu4c/source/test/intltest/intltest.cpp b/icu4c/source/test/intltest/intltest.cpp
+index 633f872..d73e185 100644
+--- a/icu4c/source/test/intltest/intltest.cpp
++++ b/icu4c/source/test/intltest/intltest.cpp
+@@ -35,6 +35,8 @@
+ #include "unicode/ures.h"
+ #include "unicode/utf16.h"
+
++#include "tools/cpp/runfiles/runfiles.h"
++#include <memory>
+ #include "intltest.h"
+
+ #include "caltztst.h"
+@@ -1267,6 +1269,23 @@ main(int argc, char* argv[])
+
+     U_MAIN_INIT_ARGS(argc, argv);
+
++    // Initialize Bazel Runfiles
++    using bazel::tools::cpp::runfiles::Runfiles;
++    std::string error;
++    Runfiles* runfiles = Runfiles::Create(argv[0], &error);
++    if (runfiles == nullptr) {
++        fprintf(stderr, "Runfiles::Create error: %s\n", error.c_str());
++    } else {
++        std::string icuDataPath = runfiles->Rlocation("icu/icu4c/source/data/out/build/icudt79l");
++        if (icuDataPath.empty()) {
++             icuDataPath = runfiles->Rlocation("icu4c/source/data/out/build/icudt79l");
++        }
++        if (!icuDataPath.empty()) {
++            u_setDataDirectory(icuDataPath.c_str());
++        }
++        delete runfiles;
++    }
++
+     startTime = uprv_getRawUTCtime();
+
+     for (int i = 1; i < argc; ++i) {

@@ -10,9 +10,7 @@ cc_library(
     hdrs = [
         "stubdata.h"
     ],
-    copts = [
-        "-Iicu4c/source/common",
-    ],
+    includes = ["."],
     deps = [
         "//icu4c/source/common:common_headers",
     ],

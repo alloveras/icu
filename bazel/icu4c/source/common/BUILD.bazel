@@ -228,6 +228,7 @@ cc_library(
         "uresdata.h",
         "ustrenum.h"
     ],
+    includes = ["."],
     copts = [
         "-Iicu4c/source/common",
     ],
@@ -663,10 +664,9 @@ cc_library(
         "uresdata.h",
         "ustrenum.h"
     ],
+    includes = ["."],
     copts = [
         "-DU_COMMON_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
     ],
     deps = [
         "//icu4c/source/stubdata:stubdata",

@@ -22,12 +22,7 @@ cc_library(
         "unicode/testdata.h",
         "unicode/utimer.h"
     ],
-    copts = [
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/tools/toolutil",
-        "-Iicu4c/source/tools/ctestfw",
-    ],
+    includes = ["."],
     deps = [
         "//icu4c/source/common:common",
         "//icu4c/source/i18n:i18n",

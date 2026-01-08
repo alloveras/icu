@@ -80,6 +80,7 @@ cc_library(
     hdrs = [
         {common_hdrs_formatted}
     ],
+    includes = ["."],
     copts = [
         "-Iicu4c/source/common",
     ],
@@ -93,10 +94,9 @@ cc_library(
     hdrs = [
         {common_hdrs_formatted}
     ],
+    includes = ["."],
     copts = [
         "-DU_COMMON_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
     ],
     deps = [
         "//icu4c/source/stubdata:stubdata",
@@ -126,10 +126,9 @@ cc_library(
     hdrs = [
         {i18n_hdrs_formatted}
     ],
+    includes = ["."],
     copts = [
         "-DU_I18N_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
     ],
     deps = [
         "//icu4c/source/common:common",
@@ -158,11 +157,9 @@ cc_library(
     hdrs = [
         {io_hdrs_formatted}
     ],
+    includes = ["."],
     copts = [
         "-DU_IO_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/io",
     ],
     deps = [
         "//icu4c/source/common:common",
@@ -190,9 +187,7 @@ cc_library(
     hdrs = [
         {stubdata_hdrs_formatted}
     ],
-    copts = [
-        "-Iicu4c/source/common",
-    ],
+    includes = ["."],
     deps = [
         "//icu4c/source/common:common_headers",
     ],
@@ -219,11 +214,9 @@ cc_library(
     hdrs = [
         {toolutil_hdrs_formatted}
     ],
+    includes = ["."],
     copts = [
         "-DU_TOOLUTIL_IMPLEMENTATION",
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/tools/toolutil",
     ],
     deps = [
         "//icu4c/source/common:common",
@@ -253,12 +246,7 @@ cc_library(
     hdrs = [
         {ctestfw_hdrs_formatted}
     ],
-    copts = [
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/tools/toolutil",
-        "-Iicu4c/source/tools/ctestfw",
-    ],
+    includes = ["."],
     deps = [
         "//icu4c/source/common:common",
         "//icu4c/source/i18n:i18n",
@@ -335,9 +323,7 @@ cc_library(
     hdrs = [
         {cintltst_hdrs_formatted}
     ],
-    copts = [
-        "-Iicu4c/source/test/cintltst",
-    ],
+    includes = ["."],
 )
 
 cc_test(
@@ -347,12 +333,8 @@ cc_test(
         "runfiles_helper.cpp",
         {cintltst_hdrs_formatted}
     ],
+    includes = ["."],
     copts = [
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/tools/toolutil",
-        "-Iicu4c/source/tools/ctestfw",
-        "-Iicu4c/source/test/cintltst",
         "-DU_TOPSRCDIR=\\\\\\"icu4c/source/\\\\\\"",
     ],
     deps = [
@@ -390,16 +372,8 @@ cc_test(
         {intltest_srcs_formatted},
         {intltest_hdrs_formatted}
     ],
+    includes = [".", ".."],
     copts = [
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/io",
-        "-Iicu4c/source/tools/toolutil",
-        "-Iicu4c/source/tools/ctestfw",
-        "-Iicu4c/source/test/intltest",
-        "-Iicu4c/source/test",
-        "-DUNISTR_FROM_CHAR_EXPLICIT=",
-        "-DUNISTR_FROM_STRING_EXPLICIT=",
         "-DU_TOPSRCDIR=\\\\\\"icu4c/source/\\\\\\"",
     ],
     deps = [

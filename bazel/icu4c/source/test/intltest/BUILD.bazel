@@ -317,16 +317,8 @@ cc_test(
         "rbbimonkeytest.h",
         "ucdtest.h"
     ],
+    includes = [".", ".."],
     copts = [
-        "-Iicu4c/source/common",
-        "-Iicu4c/source/i18n",
-        "-Iicu4c/source/io",
-        "-Iicu4c/source/tools/toolutil",
-        "-Iicu4c/source/tools/ctestfw",
-        "-Iicu4c/source/test/intltest",
-        "-Iicu4c/source/test",
-        "-DUNISTR_FROM_CHAR_EXPLICIT=",
-        "-DUNISTR_FROM_STRING_EXPLICIT=",
         "-DU_TOPSRCDIR=\\\"icu4c/source/\\\"",
     ],
     deps = [
