@@ -348,7 +348,7 @@ cc_test(
         {data_files_formatted}
     ],
     env = {{
-        "ICU_DATA": "icu4c/source/data/out/build/icudt79l"
+        # "ICU_DATA": "icu4c/source/data/out/build/icudt79l"
     }},
     args = ["-w"]
 )
@@ -389,7 +389,7 @@ cc_test(
         {data_files_formatted}
     ],
     env = {{
-        "ICU_DATA": "icu4c/source/data/out/build/icudt79l"
+        # "ICU_DATA": "icu4c/source/data/out/build/icudt79l"
     }},
     args = ["-w"]
 )

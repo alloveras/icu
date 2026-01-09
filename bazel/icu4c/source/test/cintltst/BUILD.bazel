@@ -9579,7 +9579,7 @@ cc_test(
         "//icu4c/source/test/testdata:zoneinfo64.txt"
     ],
     env = {
-        "ICU_DATA": "icu4c/source/data/out/build/icudt79l"
+        # "ICU_DATA": "icu4c/source/data/out/build/icudt79l"
     },
     args = ["-w"]
 )
