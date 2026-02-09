@@ -52,6 +52,20 @@ public:
     void testAPI(void);
     void testAPISimple(void);
 
+    /*
+    NB: The 'messageFormat1Tests' is required to avoid the following compile error
+    when building the 'intltest' test suite.
+
+    error: no declaration matches 'void TestMessageFormat2::messageFormat1Tests()'
+    147 | void TestMessageFormat2::messageFormat1Tests() {
+        |      ^~~~~~~~~~~~~~~~~~
+    note: no functions named 'void TestMessageFormat2::messageFormat1Tests()'
+    note: 'class TestMessageFormat2' defined here
+
+    The issue has been reported here: https://unicode-org.atlassian.net/browse/<ISSUE_NUMBER>
+    */
+    void messageFormat1Tests(void);
+
 private:
     void jsonTestsFromFiles(IcuTestErrorCode&);
 

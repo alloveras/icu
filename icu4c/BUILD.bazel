@@ -1,0 +1,23 @@
+# Copyright (C) 2024 and later: Unicode, Inc. and others.
+# License & terms of use: http://www.unicode.org/copyright.html
+
+# Top-level aliases for convenient external consumption.
+# Consumers can depend on @icu//icu4c:icuuc instead of @icu//icu4c/source/common:icuuc
+
+alias(
+    name = "icuuc",
+    actual = "//icu4c/source/common:icuuc",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "icui18n",
+    actual = "//icu4c/source/i18n:icui18n",
+    visibility = ["//visibility:public"],
+)
+
+alias(
+    name = "icuio",
+    actual = "//icu4c/source/io:icuio",
+    visibility = ["//visibility:public"],
+)

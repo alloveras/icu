@@ -1,0 +1,10 @@
+load("@rules_python//python:defs.bzl", "py_test")
+
+py_test(
+    name = "test",
+    srcs = glob(["*.py"]),
+    data = glob(["sample_data/**/*.json"]),
+    imports = ["../../.."],
+    main = "__bazel__.py",
+    deps = ["//icu4c/source/python/icutools/databuilder"],
+)

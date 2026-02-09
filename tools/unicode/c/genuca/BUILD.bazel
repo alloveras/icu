@@ -4,7 +4,7 @@
 # This Bazel build file defines a target representing the binary executable
 # `genuca`, which is used for generating ICU root collation data files.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -17,16 +17,10 @@ cc_binary(
         "*.h",   # cannot have hdrs section in cc_binary
     ]),
     deps = [
-        "//icu4c/source/common:headers",
-        "//icu4c/source/common:platform",
-        "//icu4c/source/i18n:collation_builder",
-        "//icu4c/source/i18n:headers",
-        "//icu4c/source/tools/toolutil:collationinfo",
-        "//icu4c/source/tools/toolutil:toolutil",
-        "//icu4c/source/tools/toolutil:unewdata",
-        "//icu4c/source/tools/toolutil:uoptions",
-        "//icu4c/source/tools/toolutil:uparse",
-        "//icu4c/source/tools/toolutil:writesrc",
+        # Use bootstrap versions to avoid circular dependencies
+        "//icu4c/source/common:icuuc_bootstrap",
+        "//icu4c/source/i18n:icui18n_bootstrap",
+        "//icu4c/source/tools/toolutil:bootstrap",
     ],
     # Markus 2021-06-16:
     # The pthread library is not linked in automatically.

@@ -1,0 +1,12 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "gentest",
+    srcs = [
+        "genres32.c",
+        "gentest.c",
+        "gentest.h",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["//icu4c/source/tools/toolutil:bootstrap"],
+)

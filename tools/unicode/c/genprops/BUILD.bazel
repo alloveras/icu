@@ -9,7 +9,7 @@
 # enables the use of the output file from executing the binary as a part of
 # other Bazel targets defined using `genrule`.
 
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -22,29 +22,9 @@ cc_binary(
         "*.h",   # cannot have hdrs section in cc_binary
     ]),
     deps = [
-        "//icu4c/source/common:uhash",
-        "//icu4c/source/common:umutablecptrie",
-        "//icu4c/source/common:ucptrie",
-        "//icu4c/source/common:utrie2",
-        "//icu4c/source/common:utrie2_builder",
-        "//icu4c/source/common:bytestrie",
-        "//icu4c/source/common:bytestriebuilder",
-        "//icu4c/source/common:propsvec",
-        "//icu4c/source/common:errorcode",
-        "//icu4c/source/common:ucharstriebuilder",
-        "//icu4c/source/common:uniset",
-        "//icu4c/source/common:uvector32",
-
-        "//icu4c/source/common:platform",
-        "//icu4c/source/common:headers",
-
-        "//icu4c/source/tools/toolutil:ppucd",
-        "//icu4c/source/tools/toolutil:unewdata",
-        "//icu4c/source/tools/toolutil:writesrc",
-        "//icu4c/source/tools/toolutil:uoptions",
-        "//icu4c/source/tools/toolutil:uparse",
-        "//icu4c/source/tools/toolutil:toolutil",
-        "//icu4c/source/tools/toolutil:denseranges",
+        # Use bootstrap versions to avoid circular dependencies
+        "//icu4c/source/common:icuuc_bootstrap",
+        "//icu4c/source/tools/toolutil:bootstrap",
     ],
     linkopts = ["-pthread"],
 )

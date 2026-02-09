@@ -1,1 +1,103 @@
-../../../../bazel/icu4c/source/test/testdata/BUILD.bazel
+load("@aspect_bazel_lib//lib:run_binary.bzl", "run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+
+package(default_visibility = ["//icu4c/source/test:__subpackages__"])
+
+# Wrapper script for generating test data.
+py_binary(
+    name = "generate_testdata",
+    srcs = ["generate_testdata.py"],
+    imports = ["../../python"],
+    deps = ["//icu4c/source/python/icutools/databuilder"],
+)
+
+# Generate the test data package using run_binary
+# This invokes the local generate_testdata.py wrapper which orchestrates:
+# 1. databuilder - generates .res files
+# 2. pkgdata - packages into .dat
+# 3. genccode - converts to assembly
+run_binary(
+    name = "testdata_gen",
+    srcs = glob([
+        "**/*.txt",
+        "**/*.ucm",
+        "**/*.utf16be",
+        "**/*.res",
+        "**/*.toml",
+        "**/*.bin",
+    ]) + [
+        "BUILDRULES.py",
+        # Need access to unidata for some test data generation.
+        "//icu4c/source/data:unidata",
+        # Need the main ICU data for genrb to compile collation tailorings.
+        "//icu4c/source/data:icudata_dat_file",
+        # Need the ICU tools to run 'pkgdata' and 'genccode'.
+        "//icu4c/source/tools:tooldir",
+    ],
+    outs = [
+        "out/testdata.dat",
+        "testdata_dat.S",
+        # Standalone files that tests expect outside the .dat package.
+        "out/testdata/zoneinfo64.res",
+        "out/testdata/nam.typ",
+    ],
+    args = [
+        "--src_dir",
+        "$(execpath BUILDRULES.py)/..",
+        "--tool_dir",
+        "$(execpath //icu4c/source/tools:tooldir)",
+        "--out_dir",
+        "$(execpath testdata_dat.S)/..",
+        "--pkg_name",
+        "testdata",
+        "--entry_name",
+        "testdata",
+        "--icu_data_file",
+        "$(execpath //icu4c/source/data:icudata_dat_file)",
+    ],
+    tool = ":generate_testdata",
+)
+
+# The compiled test data as a cc_library
+cc_library(
+    name = "testdata",
+    srcs = ["testdata_dat.S"],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Export the .dat file for tests
+filegroup(
+    name = "testdata_dat_file",
+    srcs = ["out/testdata.dat"],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Export standalone test files (zoneinfo64.res, nam.typ) that tests need
+# These files are TmpFile outputs from the databuilder but some tests need them as standalone files
+filegroup(
+    name = "testdata_standalone_files",
+    srcs = [
+        "out/testdata/nam.typ",
+        "out/testdata/zoneinfo64.res",
+    ],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Export raw test data files that tests need to read directly
+filegroup(
+    name = "testdata_files",
+    srcs = glob([
+        "*.txt",
+        "*.xml",
+        "*.otf",
+        "*.ucm",
+        "*.bin",
+        "*.res",
+        "break_rules/*",
+        "cldr/**",
+        "codepointtrie/**",
+        "filters/**",
+    ]),
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)

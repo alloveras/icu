@@ -1,1 +1,64 @@
-../../../bazel/icu4c/source/common/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//icu4c/source:__subpackages__"])
+
+cc_library(
+    name = "icuuc",
+    srcs = glob([
+        "*.cpp",
+        "*.h",
+    ]),
+    hdrs = glob(["unicode/*.h"]),
+    includes = ["."],
+    local_defines = [
+        "U_COMMON_IMPLEMENTATION=1",
+        # Path to ICU data file for Bazel runfiles lookup.
+        # This is used when ICU is consumed as an external dependency via bazel_dep.
+        "ICU_DATA_DIR_BAZEL=\\\"$(rlocationpath //icu4c/source/data:icudata_dat_file)\\\"",
+    ],
+    visibility = ["//visibility:public"],
+    data = [
+        "//icu4c/source/data:icudata_dat_file",
+    ],
+    deps = [
+        # The real data (not stub) - linked statically.
+        "//icu4c/source/data:icudata",
+        # Runfiles library for finding data at runtime (fallback).
+        "@rules_cc//cc/runfiles",
+    ],
+)
+
+cc_library(
+    name = "icuuc_bootstrap",
+    srcs = glob([
+        "*.cpp",
+        "*.h",
+    ]),
+    hdrs = glob(["unicode/*.h"]),
+    includes = ["."],
+    local_defines = [
+        "U_COMMON_IMPLEMENTATION=1",
+    ],
+    visibility = [
+        "//icu4c/source/i18n:__pkg__",
+        "//icu4c/source/tools:__subpackages__",
+        "//tools/unicode/c:__subpackages__",
+    ],
+    deps = [
+        # Use a stub data library to solve the following bootstrapping problem:
+        #  1. ICU tools need ICU libraries to build
+        #  2. ICU libraries need ICU data to link
+        #  3. ICU data needs ICU tools to generate (cycle).
+        "//icu4c/source/stubdata:icudata",
+    ],
+)
+
+cc_library(
+    name = "headers",
+    hdrs = glob(["unicode/*.h"]),
+    includes = ["."],
+    visibility = [
+        "//icu4c/source:__subpackages__",
+        "//tools/unicode/c:__subpackages__",
+    ],
+)

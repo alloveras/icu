@@ -1,1 +1,123 @@
-../../../../bazel/icu4c/source/tools/toolutil/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = [
+    "//icu4c/source:__subpackages__",
+    "//tools/unicode/c:__subpackages__",
+])
+
+cc_library(
+    name = "toolutil",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob([
+        "*.h",
+        "*.hpp",
+    ]),
+    includes = ["."],
+    local_defines = [
+        "U_TOOLUTIL_IMPLEMENTATION=1",
+        # This should (ideally), be set dynamically based on the platform. However, we
+        # know that, for Canva use-cases of icu, the 'elf.h' header is always present.
+        # See: https://github.com/unicode-org/icu/blob/release-76-1/icu4c/source/configure.ac#L408-L411
+        "U_HAVE_ELF_H=1",
+    ],
+    deps = [
+        "//icu4c/source/common:icuuc",
+        "//icu4c/source/i18n:icui18n",
+    ],
+)
+
+cc_library(
+    name = "bootstrap",
+    srcs = glob(["*.cpp"]),
+    hdrs = glob([
+        "*.h",
+        "*.hpp",
+    ]),
+    includes = ["."],
+    local_defines = [
+        "U_TOOLUTIL_IMPLEMENTATION=1",
+        # This should (ideally), be set dynamically based on the platform. However, we
+        # know that, for Canva use-cases of icu, the 'elf.h' header is always present.
+        # See: https://github.com/unicode-org/icu/blob/release-76-1/icu4c/source/configure.ac#L408-L411
+        "U_HAVE_ELF_H=1",
+    ],
+    deps = [
+        "//icu4c/source/common:icuuc_bootstrap",
+        "//icu4c/source/i18n:icui18n_bootstrap",
+    ],
+)
+
+# Individual granular targets for specific source files.
+# These are used by //tools/unicode/c/... for fine-grained dependencies.
+
+cc_library(
+    name = "uoptions",
+    srcs = ["uoptions.cpp"],
+    hdrs = ["uoptions.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = ["//icu4c/source/common:icuuc"],
+)
+
+cc_library(
+    name = "denseranges",
+    srcs = ["denseranges.cpp"],
+    hdrs = ["denseranges.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = ["//icu4c/source/common:icuuc"],
+)
+
+cc_library(
+    name = "filestrm",
+    srcs = ["filestrm.cpp"],
+    hdrs = ["filestrm.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = ["//icu4c/source/common:icuuc"],
+)
+
+cc_library(
+    name = "uparse",
+    srcs = ["uparse.cpp"],
+    hdrs = ["uparse.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = [
+        ":filestrm",
+        "//icu4c/source/common:icuuc",
+    ],
+)
+
+cc_library(
+    name = "ppucd",
+    srcs = ["ppucd.cpp"],
+    hdrs = ["ppucd.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = [
+        ":uparse",
+        "//icu4c/source/common:icuuc",
+    ],
+)
+
+cc_library(
+    name = "unewdata",
+    srcs = ["unewdata.cpp"],
+    hdrs = ["unewdata.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = [
+        ":filestrm",
+        "//icu4c/source/common:icuuc",
+    ],
+)
+
+cc_library(
+    name = "writesrc",
+    srcs = ["writesrc.cpp"],
+    hdrs = ["writesrc.h"],
+    includes = ["."],
+    local_defines = ["U_TOOLUTIL_IMPLEMENTATION=1"],
+    deps = ["//icu4c/source/common:icuuc"],
+)

@@ -157,6 +157,11 @@
 #   define HAVE_GETTIMEOFDAY 0
 #endif
 
+#ifdef BAZEL_CURRENT_REPOSITORY
+#include "rules_cc/cc/runfiles/runfiles.h"
+using rules_cc::cc::runfiles::Runfiles;
+#endif
+
 U_NAMESPACE_USE
 
 /* Define the extension for data files, again... */
@@ -1467,6 +1472,23 @@ static void U_CALLCONV dataDirectoryInitFn() {
         path=getenv("ICU_DATA");
 #     endif
 #   endif
+
+    /* Try Bazel runfiles lookup if enabled */
+#if defined(BAZEL_CURRENT_REPOSITORY) && defined(ICU_DATA_DIR_BAZEL)
+    static std::string bazel_dat_path;
+    if (path == nullptr || *path == 0) {
+        std::unique_ptr<Runfiles> runfiles(Runfiles::Create("", BAZEL_CURRENT_REPOSITORY));
+        if (runfiles) {
+            bazel_dat_path = runfiles->Rlocation(ICU_DATA_DIR_BAZEL);
+            // Rlocation returns the file path; we need the directory containing it
+            size_t lastSep = bazel_dat_path.find_last_of("/\\");
+            if (lastSep != std::string::npos) {
+                bazel_dat_path = bazel_dat_path.substr(0, lastSep);
+            }
+            path = bazel_dat_path.c_str();
+        }
+    }
+#endif
 
     /* ICU_DATA_DIR may be set as a compile option.
      * U_ICU_DATA_DEFAULT_DIR is provided and is set by ICU at compile time

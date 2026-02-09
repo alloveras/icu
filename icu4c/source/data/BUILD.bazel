@@ -1,1 +1,150 @@
-../../../bazel/icu4c/source/data/BUILD.bazel
+load("@aspect_bazel_lib//lib:run_binary.bzl", "run_binary")
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_python//python:defs.bzl", "py_binary")
+
+package(default_visibility = ["//icu4c/source:__subpackages__"])
+
+# ICU version information
+ICU_VERSION = "79"
+
+ICU_DATA_NAME = "icudt" + ICU_VERSION + "l"
+
+# Platform configuration for data file format
+# Unix platforms use GAS assembly (.S), Windows uses COFF object files (.obj)
+config_setting(
+    name = "windows",
+    constraint_values = ["@platforms//os:windows"],
+)
+
+exports_files(
+    ["unidata/NormalizationCorrections.txt"],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Unicode data files - exposed for tests that need direct access
+filegroup(
+    name = "unidata",
+    srcs = glob(["unidata/*.txt"]),
+    visibility = ["//icu4c/source:__subpackages__"],
+)
+
+# StringPrep data files - needed by intltest for raw file parsing tests
+filegroup(
+    name = "sprep",
+    srcs = glob(["sprep/*.txt"]),
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# All source data files for ICU data generation
+DATA_SRCS = [
+    "BUILDRULES.py",
+    "//icu4c/source/tools:tooldir",
+] + glob([
+    "brkitr/**/*.txt",
+    "brkitr/LOCALE_DEPS.json",
+    "coll/*.txt",
+    "coll/LOCALE_DEPS.json",
+    "curr/*.txt",
+    "curr/LOCALE_DEPS.json",
+    "in/*.icu",
+    "in/*.nrm",
+    "in/coll/*.icu",
+    "lang/*.txt",
+    "lang/LOCALE_DEPS.json",
+    "locales/*.txt",
+    "locales/LOCALE_DEPS.json",
+    "mappings/*.txt",
+    "mappings/*.ucm",
+    "misc/*.txt",
+    "rbnf/*.txt",
+    "rbnf/LOCALE_DEPS.json",
+    "region/*.txt",
+    "region/LOCALE_DEPS.json",
+    "sprep/*.txt",
+    "translit/*.txt",
+    "unidata/*.txt",
+    "unit/*.txt",
+    "unit/LOCALE_DEPS.json",
+    "zone/*.txt",
+    "zone/LOCALE_DEPS.json",
+])
+
+# Wrapper script for generating ICU data
+py_binary(
+    name = "generate_data",
+    srcs = ["generate_data.py"],
+    imports = ["../python"],
+    deps = ["//icu4c/source/python/icutools/databuilder"],
+)
+
+# Common arguments for data generation
+_DATA_GEN_ARGS = [
+    "--src_dir",
+    "$(location BUILDRULES.py)/..",
+    "--tool_dir",
+    "$(location //icu4c/source/tools:tooldir)",
+    "--pkg_name",
+    ICU_DATA_NAME,
+    "--entry_name",
+    "icudt" + ICU_VERSION,
+    "--include_uni_core_data",
+]
+
+# Generate ICU data for Unix platforms (Linux, macOS)
+# Produces .S assembly file for static linking
+run_binary(
+    name = "icudata_gen_unix",
+    srcs = DATA_SRCS,
+    outs = [
+        ICU_DATA_NAME + ".dat",
+        ICU_DATA_NAME + "_dat.S",
+    ],
+    args = _DATA_GEN_ARGS + [
+        "--out_dir",
+        "$(location " + ICU_DATA_NAME + ".dat)/..",
+    ],
+    target_compatible_with = select({
+        ":windows": ["@platforms//:incompatible"],
+        "//conditions:default": [],
+    }),
+    tool = ":generate_data",
+)
+
+# Generate ICU data for Windows
+# Produces .obj COFF file for static linking
+run_binary(
+    name = "icudata_gen_windows",
+    srcs = DATA_SRCS,
+    outs = [
+        ICU_DATA_NAME + "_windows.dat",
+        ICU_DATA_NAME + "_dat.obj",
+    ],
+    args = _DATA_GEN_ARGS + [
+        "--out_dir",
+        "$(location " + ICU_DATA_NAME + "_windows.dat)/..",
+    ],
+    target_compatible_with = select({
+        ":windows": [],
+        "//conditions:default": ["@platforms//:incompatible"],
+    }),
+    tool = ":generate_data",
+)
+
+# Data library that links ICU data statically
+cc_library(
+    name = "icudata",
+    srcs = select({
+        ":windows": [ICU_DATA_NAME + "_dat.obj"],
+        "//conditions:default": [ICU_DATA_NAME + "_dat.S"],
+    }),
+)
+
+# Export .dat file for runtime data loading
+filegroup(
+    name = "icudata_dat_file",
+    srcs = select({
+        ":windows": [ICU_DATA_NAME + "_windows.dat"],
+        "//conditions:default": [ICU_DATA_NAME + ".dat"],
+    }),
+    visibility = ["//icu4c/source:__subpackages__"],
+)

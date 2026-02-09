@@ -1,0 +1,15 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "makeconv",
+    srcs = [
+        "gencnvex.c",
+        "genmbcs.cpp",
+        "genmbcs.h",
+        "makeconv.cpp",
+        "makeconv.h",
+        "ucnvstat.c",
+    ],
+    visibility = ["//visibility:public"],
+    deps = ["//icu4c/source/tools/toolutil:bootstrap"],
+)

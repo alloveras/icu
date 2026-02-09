@@ -1,0 +1,11 @@
+package(default_visibility = ["//visibility:public"])
+
+# MessageFormat2 test data files
+filegroup(
+    name = "message2_testdata",
+    srcs = glob([
+        "*.json",
+        "spec/*.json",
+        "spec/functions/*.json",
+    ]),
+)

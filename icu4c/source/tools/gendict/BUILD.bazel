@@ -1,0 +1,9 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+cc_binary(
+    name = "gendict",
+    srcs = ["gendict.cpp"],
+    deps = ["//icu4c/source/tools/toolutil:bootstrap"],
+)

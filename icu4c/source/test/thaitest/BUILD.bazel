@@ -1,0 +1,18 @@
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+cc_test(
+    name = "thaitest",
+    srcs = ["thaitest.cpp"],
+    args = ["$(location space.txt)"],
+    data = [
+        "space.txt",
+        "//icu4c/source/data:icudata_dat_file",
+    ],
+    env = {
+        "ICU_DATA": "icu4c/source/data",
+    },
+    deps = [
+        "//icu4c/source/common:icuuc",
+        "//icu4c/source/i18n:icui18n",
+    ],
+)

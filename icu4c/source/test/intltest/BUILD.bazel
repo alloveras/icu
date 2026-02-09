@@ -1,1 +1,46 @@
-../../../../bazel/icu4c/source/test/intltest/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_test")
+
+package(default_visibility = ["//icu4c/source/test:__subpackages__"])
+
+cc_test(
+    name = "intltest",
+    srcs = glob([
+        "*.cpp",
+        "*.h",
+    ]),
+    data = [
+        "//icu4c/source/data:icudata_dat_file",
+        "//icu4c/source/data:sprep",
+        "//icu4c/source/data:unidata",
+        "//icu4c/source/test/testdata:testdata_dat_file",
+        "//icu4c/source/test/testdata:testdata_files",
+        # MessageFormat2 JSON test files
+        "//testdata/message2:message2_testdata",
+    ],
+    env = {
+        # ICU_DATA points to the location of the main ICU data
+        "ICU_DATA": "icu4c/source/data",
+    },
+    local_defines = [
+        # Allow implicit UnicodeString conversions for test convenience
+        "UNISTR_FROM_CHAR_EXPLICIT=",
+        "UNISTR_FROM_STRING_EXPLICIT=",
+        # ICU version information
+        'ICU_UNICODE_VERSION=\\"17.0\\"',
+        'ICU_VERSION=\\"79.0.1\\"',
+        'ICUDATA_NAME=\\"icudt79l\\"',
+        # U_TOPBUILDDIR helps the tests find the testdata at the expected path.
+        'U_TOPBUILDDIR=\\"icu4c/source/\\"',
+        # U_TOPSRCDIR is used to find source data files like unidata/confusables.txt
+        'U_TOPSRCDIR=\\"icu4c/source/\\"',
+    ],
+    deps = [
+        "//icu4c/source/common:icuuc",
+        "//icu4c/source/i18n:icui18n",
+        "//icu4c/source/io:icuio",
+        "//icu4c/source/test/cintltst:cintltst_headers",
+        "//icu4c/source/test/testdata",
+        "//icu4c/source/tools/ctestfw",
+        "//icu4c/source/tools/toolutil",
+    ],
+)
