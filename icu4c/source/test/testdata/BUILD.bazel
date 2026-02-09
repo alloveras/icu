@@ -1,1 +1,167 @@
-../../../../bazel/icu4c/source/test/testdata/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//icu4c/source/test:__subpackages__"])
+
+# Raw test data source files
+filegroup(
+    name = "testdata_sources",
+    srcs = glob(
+        ["**/*"],
+        exclude = [
+            "BUILD.bazel",
+            "BUILDRULES.py",
+            "databuilder.py",
+            "Makefile.in",
+        ],
+    ),
+)
+
+# Generate the test data package using the databuilder
+genrule(
+    name = "testdata_gen",
+    srcs = [
+        "BUILDRULES.py",
+        ":testdata_sources",
+        # Need access to unidata for some test data generation
+        "//icu4c/source/data:unidata",
+        # Need the main ICU data for genrb to compile collation tailorings
+        "//icu4c/source/data:icudata_dat_file",
+    ],
+    outs = [
+        "out/testdata.dat",
+        "testdata_dat.S",
+        # Standalone files that tests expect outside the .dat package
+        # These are generated as TmpFile by the databuilder but tests need them as standalone files
+        "out/testdata/zoneinfo64.res",
+        "out/testdata/nam.typ",
+    ],
+    cmd = """
+        set -e
+        set -x
+
+        # Find the testdata source directory
+        FIRST_FILE=$$(echo "$(locations :testdata_sources)" | tr ' ' '\\n' | head -1)
+        SRC_DIR=$$(dirname $$FIRST_FILE)
+
+        # The tooldir is a directory containing all the tools
+        TOOL_DIR=$(location //icu4c/source/tools:tooldir)
+
+        # The databuilder binary
+        DATABUILDER=$(location //icu4c/source/python/icutools/databuilder)
+
+        # Location of the main ICU data file
+        ICU_DATA_FILE=$(location //icu4c/source/data:icudata_dat_file)
+
+        OUT_DIR=$$(mktemp -d)
+        TMP_DIR=$$(mktemp -d)
+        DATA_OUT_DIR=$$OUT_DIR/testdata
+
+        mkdir -p $$DATA_OUT_DIR
+        mkdir -p $$TMP_DIR
+
+        # Set up the build directory with the main ICU data for genrb to use
+        # genrb needs this to compile collation tailoring rules
+        BUILD_DIR=$$DATA_OUT_DIR/build
+        mkdir -p $$BUILD_DIR
+        cp $$ICU_DATA_FILE $$BUILD_DIR/
+
+        echo "SRC_DIR=$$SRC_DIR"
+        echo "TOOL_DIR=$$TOOL_DIR"
+        echo "OUT_DIR=$$OUT_DIR"
+        echo "DATA_OUT_DIR=$$DATA_OUT_DIR"
+        echo "TMP_DIR=$$TMP_DIR"
+        echo "BUILD_DIR=$$BUILD_DIR"
+
+        # Run the databuilder with the testdata BUILDRULES.py
+        $$DATABUILDER \\
+            --mode unix-exec \\
+            --src_dir $$SRC_DIR \\
+            --out_dir $$DATA_OUT_DIR \\
+            --tmp_dir $$TMP_DIR \\
+            --tool_dir $$TOOL_DIR \\
+            --seqmode parallel \\
+            --verbose
+
+        # Create the package list file
+        (cd $$DATA_OUT_DIR && find . -type f ! -path './build/*' | sed 's|^\\./||') > $$TMP_DIR/testdata.lst
+
+        echo "Files to package:"
+        cat $$TMP_DIR/testdata.lst
+
+        # Package the data into a .dat file
+        $$TOOL_DIR/pkgdata -m common -p testdata -c \\
+            -s $$DATA_OUT_DIR \\
+            -d $$TMP_DIR \\
+            $$TMP_DIR/testdata.lst
+
+        # Convert the .dat file to assembly
+        $$TOOL_DIR/genccode \\
+            --assembly gcc \\
+            --name testdata \\
+            --entrypoint testdata \\
+            --destdir $(@D) \\
+            $$TMP_DIR/testdata.dat
+
+        # Copy the .dat file to output (in out/ subdirectory for test path expectations)
+        mkdir -p $(@D)/out
+        cp $$TMP_DIR/testdata.dat $(@D)/out/
+
+        # Copy standalone test files that tests expect outside the .dat package
+        # These are TmpFile outputs from the databuilder:
+        # - zoneinfo64.res: Old timezone data (2014a) for TestTZDataDir
+        # - nam.typ: Test file for udata_open fallback test
+        mkdir -p $(@D)/out/testdata
+        cp $$TMP_DIR/zoneinfo64.res $(@D)/out/testdata/
+        cp $$TMP_DIR/nam.typ $(@D)/out/testdata/
+
+        # Cleanup
+        rm -rf $$OUT_DIR $$TMP_DIR
+    """,
+    tools = [
+        "//icu4c/source/python/icutools/databuilder",
+        "//icu4c/source/tools:tooldir",
+    ],
+)
+
+# The compiled test data as a cc_library
+cc_library(
+    name = "testdata",
+    srcs = ["testdata_dat.S"],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Export the .dat file for tests
+filegroup(
+    name = "testdata_dat_file",
+    srcs = ["out/testdata.dat"],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Export standalone test files (zoneinfo64.res, nam.typ) that tests need
+# These files are TmpFile outputs from the databuilder but some tests need them as standalone files
+filegroup(
+    name = "testdata_standalone_files",
+    srcs = [
+        "out/testdata/nam.typ",
+        "out/testdata/zoneinfo64.res",
+    ],
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)
+
+# Export raw test data files that tests need to read directly
+filegroup(
+    name = "testdata_files",
+    srcs = glob([
+        "*.txt",
+        "*.xml",
+        "*.otf",
+        "*.ucm",
+        "*.bin",
+        "*.res",
+        "break_rules/*",
+        "cldr/**",
+        "codepointtrie/**",
+        "filters/**",
+    ]),
+    visibility = ["//icu4c/source/test:__subpackages__"],
+)

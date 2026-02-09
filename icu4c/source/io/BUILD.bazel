@@ -1,1 +1,18 @@
-../../../bazel/icu4c/source/io/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//icu4c/source:__subpackages__"])
+
+cc_library(
+    name = "icuio",
+    srcs = glob([
+        "*.cpp",
+        "*.h",
+    ]),
+    hdrs = glob(["unicode/*.h"]),
+    includes = ["."],
+    local_defines = ["U_IO_IMPLEMENTATION"],
+    deps = [
+        "//icu4c/source/common:icuuc",
+        "//icu4c/source/i18n:icui18n",
+    ],
+)

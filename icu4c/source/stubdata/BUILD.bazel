@@ -1,1 +1,11 @@
-../../../bazel/icu4c/source/stubdata/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//icu4c/source:__subpackages__"])
+
+cc_library(
+    name = "icudata",
+    srcs = ["stubdata.cpp"],
+    hdrs = ["stubdata.h"],
+    includes = ["."],
+    deps = ["//icu4c/source/common:headers"],
+)

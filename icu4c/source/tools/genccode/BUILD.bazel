@@ -1,0 +1,8 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+cc_binary(
+    name = "genccode",
+    srcs = ["genccode.c"],
+    visibility = ["//visibility:public"],
+    deps = ["//icu4c/source/tools/toolutil:bootstrap"],
+)

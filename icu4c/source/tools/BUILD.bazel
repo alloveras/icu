@@ -1,0 +1,53 @@
+load("@bazel_lib//lib:copy_to_directory.bzl", "copy_to_directory")
+
+copy_to_directory(
+    name = "tooldir",
+    srcs = [
+        "//icu4c/source/tools/genbrk",
+        "//icu4c/source/tools/genccode",
+        "//icu4c/source/tools/gencfu",
+        "//icu4c/source/tools/gencnval",
+        "//icu4c/source/tools/gendict",
+        "//icu4c/source/tools/gennorm2",
+        "//icu4c/source/tools/genrb",
+        "//icu4c/source/tools/gensprep",
+        "//icu4c/source/tools/gentest",
+        "//icu4c/source/tools/icupkg",
+        "//icu4c/source/tools/makeconv",
+        "//icu4c/source/tools/pkgdata",
+    ],
+    replace_prefixes = select({
+        "@platforms//os:windows": {
+            "genbrk/genbrk.exe": "genbrk.exe",
+            "genccode/genccode.exe": "genccode.exe",
+            "gencfu/gencfu.exe": "gencfu.exe",
+            "gencnval/gencnval.exe": "gencnval.exe",
+            "gendict/gendict.exe": "gendict.exe",
+            "gennorm2/gennorm2.exe": "gennorm2.exe",
+            "genrb/genrb.exe": "genrb.exe",
+            "icupkg/icupkg.exe": "icupkg.exe",
+            "pkgdata/pkgdata.exe": "pkgdata.exe",
+            "gensprep/gensprep.exe": "gensprep.exe",
+            "makeconv/makeconv.exe": "makeconv.exe",
+            "gentest/gentest.exe": "gentest.exe",
+        },
+        "//conditions:default": {
+            "genbrk/genbrk": "genbrk",
+            "genccode/genccode": "genccode",
+            "gencfu/gencfu": "gencfu",
+            "gencnval/gencnval": "gencnval",
+            "gendict/gendict": "gendict",
+            "gennorm2/gennorm2": "gennorm2",
+            "genrb/genrb": "genrb",
+            "icupkg/icupkg": "icupkg",
+            "pkgdata/pkgdata": "pkgdata",
+            "gensprep/gensprep": "gensprep",
+            "makeconv/makeconv": "makeconv",
+            "gentest/gentest": "gentest",
+        },
+    }),
+    visibility = [
+        "//icu4c/source/data:__pkg__",
+        "//icu4c/source/test/testdata:__pkg__",
+    ],
+)

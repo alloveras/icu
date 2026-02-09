@@ -1,0 +1,19 @@
+load("@rules_cc//cc:defs.bzl", "cc_binary")
+
+package(
+    default_visibility = ["//visibility:public"],
+)
+
+cc_binary(
+    name = "gennorm2",
+    srcs = [
+        "extradata.cpp",
+        "extradata.h",
+        "gennorm2.cpp",
+        "n2builder.cpp",
+        "n2builder.h",
+        "norms.cpp",
+        "norms.h",
+    ],
+    deps = ["//icu4c/source/tools/toolutil:bootstrap"],
+)

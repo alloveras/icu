@@ -1,1 +1,19 @@
-../../../../bazel/icu4c/source/tools/ctestfw/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library")
+
+package(default_visibility = ["//icu4c/source:__subpackages__"])
+
+cc_library(
+    name = "ctestfw",
+    srcs = glob([
+        "*.c",
+        "*.cpp",
+    ]),
+    hdrs = glob(["unicode/*.h"]),
+    includes = ["."],
+    local_defines = ["T_CTEST_IMPLEMENTATION"],
+    deps = [
+        "//icu4c/source/common:icuuc",
+        "//icu4c/source/i18n:icui18n",
+        "//icu4c/source/tools/toolutil",
+    ],
+)

@@ -1,7 +1,0 @@
-bazel_dep(name = "rules_cc", version = "0.0.9")
-
-icu_overlay = use_repo_rule("//:overlay_repository.bzl", "icu_overlay")
-
-icu_overlay(
-    name = "icu",
-)

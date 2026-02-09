@@ -1,1 +1,53 @@
-../../../../bazel/icu4c/source/test/cintltst/BUILD.bazel
+load("@rules_cc//cc:defs.bzl", "cc_library", "cc_test")
+
+package(default_visibility = ["//icu4c/source/test:__subpackages__"])
+
+# Headers and data files shared with intltest
+cc_library(
+    name = "cintltst_headers",
+    hdrs = glob([
+        "*.h",
+        "*.inc",
+    ]),
+    includes = ["."],
+)
+
+cc_test(
+    name = "cintltst",
+    srcs = glob([
+        "*.c",
+        "*.h",
+        "*.inc",
+    ]),
+    data = [
+        "//icu4c/source/data:icudata_dat_file",
+        "//icu4c/source/data:unidata",
+        "//icu4c/source/test/testdata:testdata_dat_file",
+        "//icu4c/source/test/testdata:testdata_files",
+        "//icu4c/source/test/testdata:testdata_standalone_files",
+    ],
+    env = {
+        # ICU_DATA points to the location of the main ICU data
+        "ICU_DATA": "icu4c/source/data",
+    },
+    local_defines = [
+        # ICU version information - need escaped quotes for C string literals
+        'ICU_UNICODE_VERSION=\\"17.0\\"',
+        'ICU_VERSION=\\"79.0.1\\"',
+        'ICUDATA_NAME=\\"icudt79l\\"',
+        # U_TOPBUILDDIR helps the tests find the testdata at the expected path.
+        # With this defined, loadTestData() looks for testdata at:
+        #   U_TOPBUILDDIR + "test/testdata/out/" + "testdata"
+        # So the testdata.dat needs to be at: icu4c/source/test/testdata/out/testdata.dat
+        'U_TOPBUILDDIR=\\"icu4c/source/\\"',
+        # U_TOPSRCDIR is used to find source data files like unidata/confusables.txt
+        'U_TOPSRCDIR=\\"icu4c/source/\\"',
+    ],
+    deps = [
+        "//icu4c/source/common:icuuc",
+        "//icu4c/source/i18n:icui18n",
+        "//icu4c/source/test/testdata",
+        "//icu4c/source/tools/ctestfw",
+        "//icu4c/source/tools/toolutil",
+    ],
+)
