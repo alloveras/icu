@@ -1,0 +1,7 @@
+load("@rules_python//python:defs.bzl", "py_library")
+
+py_library(
+    name = "renderers",
+    srcs = glob(["*.py"]),
+    visibility = ["//icu4c/source/python/icutools/databuilder:__pkg__"],
+)

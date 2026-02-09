@@ -1,0 +1,25 @@
+load("@rules_python//python:defs.bzl", "py_binary", "py_library")
+
+py_library(
+    name = "databuilder_lib",
+    srcs = glob(
+        ["*.py"],
+        exclude = ["databuilder_entry.py"],
+    ),
+    data = ["filtration_schema.json"],
+    imports = ["../.."],
+    visibility = ["//visibility:public"],
+    deps = [
+        "//icu4c/source/python/icutools",
+        "//icu4c/source/python/icutools/databuilder/renderers",
+    ],
+)
+
+py_binary(
+    name = "databuilder",
+    srcs = ["databuilder_entry.py"],
+    imports = ["../.."],
+    main = "databuilder_entry.py",
+    visibility = ["//visibility:public"],
+    deps = [":databuilder_lib"],
+)

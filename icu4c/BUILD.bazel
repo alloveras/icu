@@ -1,0 +1,16 @@
+# alias(
+#     name = "icu",
+#     actual = "//source:icu",
+#     visibility = ["//visibility:public"],
+# )
+
+# alias(
+#     name = "icu_headers",
+#     actual = "//source:hdrs",
+#     visibility = ["//visibility:public"],
+# )
+
+# exports_files(
+#     ["LICENSE"],
+#     visibility = ["//visibility:public"],
+# )
